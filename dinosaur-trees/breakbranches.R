@@ -1,12 +1,19 @@
+# Function that takes a phylogenetic tree and adds taxa to branches
+# Probability of adding a taxon is increased if the branch is longer
+# Break points are taken from a uniform distribution
+# Can vary the number of taxa to add, and change the smallest branch to break
+# Natalie Cooper July 2017
 
+# This code allows you to add taxa to new branches added as you go along
+# Not sure if it should be restricted to the original branches on the tree
 
-break_branches <- function(tree, number.to.break, min.branch.length = 0.1){
+break_branches <- function(tree, number.to.add, min.branch.length = 0.1){
 
   # Identify the branches leading to tips
   tip.lengths <- tree$edge.length[which(tree$edge[,2] < length(tree$tip.label))]
   
   # Loop through adding trees
-  for(i in 1:number.to.break){
+  for(i in 1:number.to.add){
 
     #-------------------------------------------
     # 1. Select branch to split based on length
