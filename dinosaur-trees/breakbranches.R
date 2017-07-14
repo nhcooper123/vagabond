@@ -54,7 +54,7 @@ break_branches <- function(tree, number.to.break, min.branch.length = 0.1){
     }
   
   # Quick clean up to remove any negative branch lengths introduced
-  tree <- tree$edge.length[tree$edge.length < 0] <- 0
+  tree$edge.length[tree$edge.length < 0] <- 0
   return(tree)
 }
 
