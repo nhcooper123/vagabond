@@ -7,6 +7,8 @@
 # This code allows you to add taxa to new branches added as you go along
 # Not sure if it should be restricted to the original branches on the tree
 
+# Requires ape and "bind.tree.new" function
+
 break_branches <- function(tree, number.to.add, min.branch.length = 0.1){
 
   # Identify the branches leading to tips
