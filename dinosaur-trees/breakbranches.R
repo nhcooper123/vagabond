@@ -5,18 +5,12 @@ break_branches <- function(tree, number.to.break, min.branch.length = 0.1){
   # Identify the branches leading to tips
   tip.lengths <- tree$edge.length[which(tree$edge[,2] < length(tree$tip.label))]
   
-  # Identify branches that are long enough to split
-  # And their branch lengths
-  branch.sample <- which(tree$edge.length > min.branch.length)
-  branch.sample.lengths <- tree$edge.length[branch.sample]
-  
   # Loop through adding trees
   for(i in 1:number.to.break){
-  print(i)
+
     #-------------------------------------------
     # 1. Select branch to split based on length
     #-------------------------------------------
-
     # Longer branches have higher probability of selection
     # Probability is directly the branch lengths
     add.to.node <- sample(which(tree$edge.length > min.branch.length),
@@ -54,24 +48,19 @@ break_branches <- function(tree, number.to.break, min.branch.length = 0.1){
     tree.to.add <- paste("(", species.to.add, ":", branch.length, ");", sep="")
     tree.to.add <- read.tree(text = tree.to.add) 
 
-    tree <- bind.tree(tree, tree.to.add, where = add.to.node, 
-                      position = split.point)
+    try(tree <- bind.tree.new(tree, tree.to.add, where = add.to.node, 
+                      position = split.point))
       
     }
+  
+  # Quick clean up to remove any negative branch lengths introduced
+  tree <- tree$edge.length[tree$edge.length < 0] <- 0
   return(tree)
 }
 
 # Example
-treex <- rtree(20)
-  plot(treex)
-  nodelabels()
+# treex <- rtree(20)
+# plot(treex)
   
-newt <- break_branches(treex, 20, 0.1)
-plot(newt)
-nodelabels()
-
-Error in if (position < 0) position <- 0 : 
-  missing value where TRUE/FALSE needed
-In addition: Warning message:
-  In runif(n = 1, max = (length.branch - 0.01), min = (min.branch.length -  :
-                                                         NAs produced
+# new.tree <- break_branches(treex, 20, 0.1)
+# plot(newt)
