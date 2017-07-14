@@ -21,18 +21,20 @@ break_branches <- function(tree, number.to.break, min.branch.length = 0.1){
     # Probability is directly the branch lengths
     add.to.node <- sample(which(tree$edge.length > min.branch.length),
                           size = 1,
-                          prob = (tree$edge.length[which(tree$edge.length > min.branch.length)]*10))
+                          prob = (tree$edge.length[which(tree$edge.length > min.branch.length)]))
 
     #----------------------------------------------
     # 2. Determine point where the split will occur
     #-----------------------------------------------
     # First get the length of the branch to split
     # This will be the maximum split point
-    length.branch <- tree$edge.length[which(tree$edge[,2] == add.to.node)]
+    length.branch <- tree$edge.length[add.to.node]
 
-    # Use uniform distribution to select split point  
-    split.point <- runif(n = 1, max = (length.branch-0.01), 
-                         min = (min.branch.length-0.01))
+    # Use uniform distribution to select split point 
+    # Need to avoid split being at end of branch, so max has small 
+    # arbitrary value taken off it. Likewise min is not zero but 0.01
+    split.point <- runif(n = 1, max = (length.branch - 0.01), 
+                         min = 0.01)
 
     #------------------------------------------------------
     # 3. Determine characteristics of branch/species to add
@@ -59,6 +61,7 @@ break_branches <- function(tree, number.to.break, min.branch.length = 0.1){
   return(tree)
 }
 
+# Example
 treex <- rtree(20)
   plot(treex)
   nodelabels()
@@ -66,8 +69,6 @@ treex <- rtree(20)
 newt <- break_branches(treex, 20, 0.1)
 plot(newt)
 nodelabels()
-
-I think somethign wrong with the branch length probabilities and also the lengths htemselves
 
 Error in if (position < 0) position <- 0 : 
   missing value where TRUE/FALSE needed
