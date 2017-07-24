@@ -7,9 +7,9 @@
 
 make_age_data <-function(tree){
   
-  age.data <- data.frame(array(dim = c(length(tree$edge.length), 5)))
+  age.data <- data.frame(array(dim = c(length(tree$edge.length), 6)))
   colnames(age.data) <- c("edge.no", "start.node", "end.node", 
-                          "age.start.node", "age.end.node")
+                          "age.start.node", "age.end.node", "branch.length")
   
   # Add edge and node numbers
   age.data$edge.no <- 1:length(tree$edge.length)
@@ -33,6 +33,10 @@ make_age_data <-function(tree){
       age.data$age.start.node[i] <- max(node.ages$ages) -
         (node.ages$ages[node.ages$edge[, 2] == age.data$start.node[i]])
     }
+
+  # Add branch lengths
+  age.data$branch.length <- age.data$age.start.node - age.data$age.end.node
+
   }
   return(age.data)
 }
@@ -45,7 +49,7 @@ make_age_data <-function(tree){
 # and branches that span the whole duration
 #---------------------------------------------------------------------
 
-branch.in.period <- function(age.data, youngest.date, oldest.date){
+branch_in_period <- function(age.data, youngest.date, oldest.date){
   which((age.data$age.start.node > youngest.date & age.data$age.start.node < oldest.date) |
           (age.data$age.end.node > youngest.date & age.data$age.end.node < oldest.date) |
           (age.data$age.end.node < youngest.date & age.data$age.start.node > oldest.date))
