@@ -1,8 +1,17 @@
-
+# Function that takes a phylogenetic tree and adds taxa to branches
+# but only to branches within a user defined time period
+# Probability of adding a taxon is increased if the branch is longer
+# Break points are taken from a uniform distribution
+# Can vary the number of taxa to add, and change the smallest branch to break
+# as well as the start and end of the time period
 
 # Natalie Cooper July 2017
 
+# This code allows you to add taxa to new branches added as you go along
+# Not sure if it should be restricted to the original branches on the tree
+
 # Requires ape
+# Requires functions in branch_in_period.R
 
 break_branches_select_age <- function(tree, number.to.add, min.branch.length = 0.1, 
                                       youngest.date, oldest.date){
@@ -12,11 +21,14 @@ break_branches_select_age <- function(tree, number.to.add, min.branch.length = 0
   
   # Loop through adding taxa
   for(i in 1:number.to.add){
-    
-    # Extract branches to split
+
+    #------------------------------------------------------------------
+    # 1. Identify branches in time period that are above defined length
+    #------------------------------------------- ----------------------   
+    # Extract branch data
     age.data <- make_age_data(tree)
     
-    # Select branches that fall into the period
+    # Select branches that fall into the defined time period
     branch.to.include <- branch_in_period(age.data, youngest.date, oldest.date)
     age.data <- age.data[branch.to.include, ]
 
@@ -24,7 +36,7 @@ break_branches_select_age <- function(tree, number.to.add, min.branch.length = 0
     age.data <- subset(age.data, branch.length >= min.branch.length)
     
     #-------------------------------------------
-    # 1. Select branch to split based on length
+    # 2. Select branch to split based on length
     #-------------------------------------------
     # Longer branches have higher probability of selection
     # Probability is directly the branch lengths
@@ -36,7 +48,7 @@ break_branches_select_age <- function(tree, number.to.add, min.branch.length = 0
     node.data <- age.data[age.data$end.node == add.to.node, ] 
     
     #----------------------------------------------
-    # 2. Determine point where the split will occur
+    # 3. Determine point where the split will occur
     #-----------------------------------------------
     # Use uniform distribution to select split point 
     # Split points vary depending on node placement
@@ -61,7 +73,7 @@ break_branches_select_age <- function(tree, number.to.add, min.branch.length = 0
     }    
     
     #------------------------------------------------------
-    # 3. Determine characteristics of branch/species to add
+    # 4. Determine characteristics of branch/species to add
     #------------------------------------------------------
     # Species name is Taxon_1 etc.
     species.to.add <- paste("Taxon", i, sep = "_")
@@ -72,7 +84,7 @@ break_branches_select_age <- function(tree, number.to.add, min.branch.length = 0
     branch.length <- sample(tip.lengths, size = 1)
     
     #------------------------------------------------------
-    # 4. Create subtrees and add
+    # 5. Create subtrees and add
     #------------------------------------------------------
     
     tree.to.add <- paste("(", species.to.add, ":", branch.length, ");", sep="")
@@ -82,7 +94,6 @@ break_branches_select_age <- function(tree, number.to.add, min.branch.length = 0
                       position = split.point)
     
   }
-  
   return(tree)
 }
 
