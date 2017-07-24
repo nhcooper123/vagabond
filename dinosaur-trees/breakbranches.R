@@ -7,12 +7,12 @@
 # This code allows you to add taxa to new branches added as you go along
 # Not sure if it should be restricted to the original branches on the tree
 
-# Requires ape and "bind.tree.new" function
+# Requires ape
 
 break_branches <- function(tree, number.to.add, min.branch.length = 0.1){
 
   # Identify the branches leading to tips
-  tip.lengths <- tree$edge.length[which(tree$edge[,2] < length(tree$tip.label))]
+  tip.lengths <- tree$edge.length[which(tree$edge[, 2] < length(tree$tip.label))]
   
   # Loop through adding trees
   for(i in 1:number.to.add){
@@ -22,22 +22,20 @@ break_branches <- function(tree, number.to.add, min.branch.length = 0.1){
     #-------------------------------------------
     # Longer branches have higher probability of selection
     # Probability is directly the branch lengths
-    add.to.node <- sample(which(tree$edge.length > min.branch.length),
+    add.to.node <- sample(tree$edge[, 2][which(tree$edge.length > min.branch.length)],
                           size = 1,
-                          prob = (tree$edge.length[which(tree$edge.length > min.branch.length)]))
+                          prob = tree$edge.length[which(tree$edge.length > min.branch.length)])
 
     #----------------------------------------------
     # 2. Determine point where the split will occur
     #-----------------------------------------------
     # First get the length of the branch to split
     # This will be the maximum split point
-    length.branch <- tree$edge.length[add.to.node]
+    length.branch <- tree$edge.length[which(tree$edge[, 2] ==  add.to.node)]
 
     # Use uniform distribution to select split point 
-    # Need to avoid split being at end of branch, so max has small 
-    # arbitrary value taken off it. Likewise min is not zero but 0.01
-    split.point <- runif(n = 1, max = (length.branch - 0.01), 
-                         min = 0.01)
+    # Bounded by 0 and branch length being split
+    split.point <- runif(n = 1, max = length.branch, min = 0)
 
     #------------------------------------------------------
     # 3. Determine characteristics of branch/species to add
@@ -57,13 +55,11 @@ break_branches <- function(tree, number.to.add, min.branch.length = 0.1){
     tree.to.add <- paste("(", species.to.add, ":", branch.length, ");", sep="")
     tree.to.add <- read.tree(text = tree.to.add) 
 
-    try(tree <- bind.tree.new(tree, tree.to.add, where = add.to.node, 
-                      position = split.point))
+    tree <- bind.tree(tree, tree.to.add, where = add.to.node, 
+                      position = split.point)
       
     }
-  
-  # Quick clean up to remove any negative branch lengths introduced
-  tree$edge.length[tree$edge.length < 0] <- 0
+
   return(tree)
 }
 
