@@ -32,22 +32,33 @@ break_branches_select_age <- function(tree, number.to.add, min.branch.length = 0
                           size = 1,
                           prob = age.data$branch.length)
     
+    # Extract data just for this node
+    node.data <- age.data[age.data$end.node == add.to.node, ] 
+    
     #----------------------------------------------
     # 2. Determine point where the split will occur
     #-----------------------------------------------
-    # First get the length of the branch to split
-    # This will be the maximum split point
-    length.branch <- tree$edge.length[which(tree$edge[, 2] ==  add.to.node)]
-    
     # Use uniform distribution to select split point 
-    # Bounded by 0 and branch length being split
-    split.point <- runif(n = 1, max = length.branch, min = 0)
+    # Split points vary depending on node placement
+    # 1. Focal node and the start of the branch are inside time period
+    if(node.data$age.start.node < oldest.date & node.data$age.end.node > youngest.date){
+      split.point <- runif(n = 1, max = node.data$branch.length, min = 0)
+    }
     
+    # 2. Focal node is inside time period, but start of the branch is outside
+    if(node.data$age.start.node > oldest.date & node.data$age.end.node > youngest.date){
+      split.point <- runif(n = 1, max = (oldest.date - node.data$age.end.node), min = 0)
+    }
     
+    # 3. Focal node is outside time period, but start of the branch is inside
+    if(node.data$age.start.node < oldest.date & node.data$age.end.node < youngest.date){
+      split.point <- runif(n = 1, max = node.data$branch.length, min = (youngest.date - node.data$age.end.node))
+    }    
     
-    
-    
-    
+    # 4. Both nodes are outside - branch spans the time period
+    if(node.data$age.start.node > oldest.date & node.data$age.end.node < youngest.date){
+      split.point <- runif(n = 1, max = (oldest.date - node.data$age.end.node), min = (youngest.date - node.data$age.end.node))
+    }    
     
     #------------------------------------------------------
     # 3. Determine characteristics of branch/species to add
@@ -79,9 +90,11 @@ break_branches_select_age <- function(tree, number.to.add, min.branch.length = 0
 treex <- rtree(20)
 plot(treex)
 axisPhylo()
-nodelabels()
 
-new.tree <- break_branches_select_age(treex, 20, 0.1, 1, 2)
+new.tree <- break_branches_select_age(treex, number.to.add = 10, min.branch.length = 0.5, 
+                                      youngest.date = 1, oldest.date = 2)
 plot(new.tree)
 axisPhylo()
-nodelabels()
+# Add lines to show where time period is - note that this doesn't line up properly...
+lines(c(1.7,1.7), c(0,100), col = "red")
+lines(c(2.7,2.7), c(0,100), col = "red")
