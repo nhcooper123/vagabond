@@ -39,7 +39,7 @@ break_branches_period <- function(tree, number.to.add, youngest.date, oldest.dat
     #-----------------------------------------------
     # First get the length of the branch to split
     # This will be the maximum split point
-    length.branch <- tree$edge.length[add.to.node]
+    length.branch <- tree$edge.length[which(tree$edge[, 2] ==  add.to.node)]
 
     # Use uniform distribution to select split point 
     # Need to avoid split being at end of branch, so max has small 
@@ -63,8 +63,7 @@ break_branches_period <- function(tree, number.to.add, youngest.date, oldest.dat
     # 4. Create subtrees and add
     #------------------------------------------------------
     branch.length <- tree$edge.length[add.to.node]
-    species.to.add <- paste("Taxon", i, sep = "_")
-
+    
     tree.to.add <- paste("(", species.to.add, ":", branch.length, ");", sep="")
     tree.to.add <- read.tree(text = tree.to.add) 
 
